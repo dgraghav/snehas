@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>A Little Universe For Sneha Sherke ✨</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            roseGlow: '#ff4d6d',
+            flirtNeon: '#ff1e56',
+            deepSpace: '#050308',
+            glassBg: 'rgba(255, 255, 255, 0.04)',
+            glassBorder: 'rgba(255, 77, 109, 0.22)',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            script: ['Caveat', 'cursive'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: #06040a;
+      color: #f9f5f6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    button, .mood-pill, .food-cat-btn, #touchCore {
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+    }
+
+    input, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
+
+    #webglCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none !important;
+    }
+
+    #ambientGlow {
+      position: fixed;
+      width: 580px;
+      height: 580px;
+      border-radius: 50%;
+      top: -120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(255, 30, 86, 0.35) 0%, transparent 70%);
+      filter: blur(140px);
+      z-index: 1;
+      pointer-events: none !important;
+      transition: background 0.8s ease;
+    }
+
+    #foregroundUI {
+      position: relative;
+      z-index: 20;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 143, 163, 0.18);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 143, 163, 0.14);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #06040a; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 143, 163, 0.2); border-radius: 10px; }
+
+    @keyframes floatChibi {
+      0%, 100% { transform: translateY(0px) rotate(-1.5deg); }
+      50% { transform: translateY(-9px) rotate(1.5deg); }
+    }
+    .chibi-float {
+      animation: floatChibi 3.6s ease-in-out infinite;
+    }
+
+    .disintegrate { animation: disintegrateAnim 0.7s forwards ease-in-out; }
+    @keyframes disintegrateAnim {
+      0% { transform: scale(1) rotate(0deg); filter: blur(0px); opacity: 1; }
+      50% { transform: scale(0.6) rotate(15deg); filter: blur(6px) hue-rotate(90deg); opacity: 0.5; }
+      100% { transform: scale(0.1) rotate(45deg); filter: blur(18px); opacity: 0; }
+    }
+
+    .scratch-container {
+      position: relative;
+      width: 100%;
+      height: 155px;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    #scratchCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+      z-index: 5;
+      touch-action: none;
+    }
+  </style>
+</head>
+
+<body class="relative min-h-screen text-slate-100 antialiased selection:bg-roseGlow selection:text-black">
+
+  <!-- Direct Audio Source (Ensure gaurai.mp3 is in the exact same folder) -->
+  <audio id="bgMusic" src="gaurai.mp3" loop preload="auto" playsinline></audio>
+
+  <canvas id="webglCanvas"></canvas>
+  <div id="ambientGlow"></div>
+
+  <div id="foregroundUI" class="relative z-20 max-w-4xl mx-auto px-4 sm:px-6 pt-8 pb-32">
+
+    <!-- Top Telemetry, Music Toggle & Live Clock -->
+    <header class="glass-pill flex items-center justify-between px-4 py-2 rounded-full mb-8 font-mono text-xs text-slate-300 max-w-2xl mx-auto gap-2">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-flirtNeon animate-ping"></span>
+        <span class="w-2 h-2 rounded-full bg-flirtNeon -ml-4"></span>
+        <span class="tracking-widest font-semibold text-rose-300 truncate">SNEHA SHERKE</span>
+      </div>
+
+      <div class="flex items-center gap-2.5">
+        <button type="button" id="musicToggleBtn" onclick="toggleBgMusic(event)" class="px-3.5 py-1.5 rounded-full bg-roseGlow/20 border border-rose-400/40 text-rose-200 hover:bg-roseGlow hover:text-black font-semibold text-[11px] flex items-center gap-1.5 transition active:scale-95">
+          <span id="musicIcon">🎵</span>
+          <span id="musicLabel">Play Song</span>
+        </button>
+        <span class="text-rose-400 font-semibold tracking-wider hidden sm:inline" id="liveClock">16:08:00 IST</span>
+      </div>
+    </header>
+
+    <!-- Hero Header with Cute Girl Cartoon Avatar -->
+    <section class="text-center mb-10">
+      <div class="relative w-32 h-32 mx-auto mb-4 chibi-float flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-flirtNeon/30 via-rose-400/20 to-purple-500/30 blur-xl"></div>
+        <div class="relative w-28 h-28 rounded-full glass-card border-2 border-rose-300/40 flex items-center justify-center overflow-hidden shadow-xl shadow-rose-950/60">
+          <svg viewBox="0 0 200 200" class="w-24 h-24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="88" fill="#1e0d1d" />
+            <path d="M46 95 C40 140, 48 175, 65 182 L135 182 C152 175, 160 140, 154 95 C150 52, 50 52, 46 95 Z" fill="#231729"/>
+            <path d="M62 152 C62 138, 138 138, 138 152 L148 190 L52 190 Z" fill="#ff4d6d"/>
+            <path d="M84 143 Q100 158 116 143" fill="none" stroke="#ffd6e0" stroke-width="3" stroke-linecap="round"/>
+            <rect x="91" y="124" width="18" height="20" rx="8" fill="#ffd9c4"/>
+            <path d="M64 92 C64 64, 136 64, 136 92 C136 122, 118 134, 100 134 C82 134, 64 122, 64 92 Z" fill="#ffe3d3"/>
+            <ellipse cx="77" cy="108" rx="8" ry="4.5" fill="#ff758f" opacity="0.55"/>
+            <ellipse cx="123" cy="108" rx="8" ry="4.5" fill="#ff758f" opacity="0.55"/>
+            <circle cx="83" cy="96" r="6.5" fill="#1f1226"/>
+            <circle cx="81" cy="94" r="2.3" fill="#ffffff"/>
+            <circle cx="85" cy="98" r="1.1" fill="#ffffff"/>
+            <circle cx="117" cy="96" r="6.5" fill="#1f1226"/>
+            <circle cx="115" cy="94" r="2.3" fill="#ffffff"/>
+            <circle cx="119" cy="98" r="1.1" fill="#ffffff"/>
+            <path d="M76 85 Q83 82 89 85" fill="none" stroke="#3b2645" stroke-width="2" stroke-linecap="round"/>
+            <path d="M111 85 Q117 82 124 85" fill="none" stroke="#3b2645" stroke-width="2" stroke-linecap="round"/>
+            <path d="M93 114 Q100 121 107 114" fill="none" stroke="#c94a6a" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M60 88 C62 52, 138 52, 140 88 C132 72, 118 72, 112 84 C106 70, 94 70, 88 84 C82 72, 68 72, 60 88 Z" fill="#2d1e36"/>
+            <path d="M126 70 C126 67, 122 67, 122 70 C122 73, 126 76, 126 76 C126 76, 130 73, 130 70 C130 67, 126 67, 126 70 Z" fill="#ff8fa3"/>
+            <text x="34" y="64" font-size="14" fill="#ff4d6d">♥</text>
+            <text x="152" y="58" font-size="12" fill="#ff8fa3">✨</text>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">
+        A Little Universe For <span class="bg-gradient-to-r from-white via-rose-200 to-roseGlow bg-clip-text text-transparent">Sneha Sherke</span>
+      </h1>
+      <p class="text-sm text-slate-400 font-light max-w-md mx-auto leading-relaxed">
+        Choose how you're feeling right now and let the words do the rest.
+      </p>
+    </section>
+
+    <!-- 1. REFINED SPLIT STUDIO: MOOD SELECTOR (LEFT) & LIVE MESSAGE (RIGHT) -->
+    <section class="mb-8">
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="font-mono text-xs uppercase tracking-widest text-roseGlow flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-roseGlow animate-pulse"></span>
+          <span>Emotional Frequency</span>
+        </div>
+        <span class="font-mono text-[11px] text-slate-400">10 States • Live Sync</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+        
+        <!-- LEFT PANEL: SLEEK MOOD DOCK -->
+        <div class="md:col-span-4 glass-card rounded-3xl p-3.5 flex flex-col justify-between">
+          <div class="font-mono text-[10px] uppercase tracking-wider text-slate-400 px-2 pb-2 mb-2 border-b border-white/5 flex justify-between items-center">
+            <span>Select Vibe</span>
+            <span class="text-rose-400">✦</span>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-1 gap-1.5" id="moodGrid">
+            <button type="button" onclick="setMood('flirt', this)" class="mood-pill active px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-flirtNeon/60 shadow-md shadow-rose-950/50 bg-gradient-to-r from-flirtNeon/20 to-rose-500/10">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">😏</span>
+                <span class="text-xs font-bold text-rose-200">Sassy Flirt</span>
+              </div>
+              <span class="w-1.5 h-1.5 rounded-full bg-flirtNeon"></span>
+            </button>
+
+            <button type="button" onclick="setMood('stress', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">💼</span>
+                <span class="text-xs font-medium text-slate-300">Burnout</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('low', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🥺</span>
+                <span class="text-xs font-medium text-slate-300">Overthinking</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('angry', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">😤</span>
+                <span class="text-xs font-medium text-slate-300">Fiery Nakhra</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('drive', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🚗</span>
+                <span class="text-xs font-medium text-slate-300">Open Drive</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('happy', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">👑</span>
+                <span class="text-xs font-medium text-slate-300">Queen Aura</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('night', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🌙</span>
+                <span class="text-xs font-medium text-slate-300">1:00 AM Sukoon</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('cravings', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🍰</span>
+                <span class="text-xs font-medium text-slate-300">Sweet Cravings</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('nostalgic', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🌧️</span>
+                <span class="text-xs font-medium text-slate-300">Nostalgic</span>
+              </div>
+            </button>
+
+            <button type="button" onclick="setMood('blanket', this)" class="mood-pill px-3.5 py-2.5 rounded-2xl flex items-center justify-between text-left transition-all duration-300 border border-transparent bg-white/[0.02] hover:bg-white/[0.06] hover:border-rose-400/20">
+              <div class="flex items-center gap-2.5">
+                <span class="text-lg">🛋️</span>
+                <span class="text-xs font-medium text-slate-300">Blanket Mode</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: LIVE MESSAGE CANVAS -->
+        <div class="md:col-span-8 glass-card rounded-3xl p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden">
+          <div class="absolute -top-20 -right-20 w-44 h-44 bg-flirtNeon/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-6 pb-3.5 border-b border-white/10">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-flirtNeon"></span>
+                <span id="activeMoodTag" class="font-mono text-[11px] uppercase tracking-widest text-rose-300 font-bold">
+                  1,000+ ENGLISH FLIRT MATRIX
+                </span>
+              </div>
+              <button type="button" onclick="generateProceduralMessage()" class="font-mono text-xs bg-roseGlow/15 text-rose-200 border border-rose-400/40 px-4 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-roseGlow hover:text-black font-semibold transition active:scale-95">
+                <span>↻</span> Next Line ✨
+              </button>
+            </div>
+
+            <div class="min-h-[210px] flex flex-col justify-center mb-5">
+              <p id="messageDisplay" class="font-sans font-semibold text-lg md:text-2xl text-white leading-relaxed tracking-wide mb-4 transition-opacity duration-200">
+                "Honestly Sneha, smiling at your phone like that should officially be illegal, because you have this unfair habit of brightening anyone's mood in two seconds flat. Stop biting your lip and admit you love being this charming."
+              </p>
+              <div id="shayariHindiDisplay" class="font-script text-2xl md:text-3xl text-rose-300 leading-relaxed tracking-wide transition-opacity duration-200">
+                "सच में Sneha, फोन देखकर मुस्कुराना बंद करो... तुम्हारा ये नखरा और मासूम अदा सच में बहुत प्यारी लगती है।"
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between font-mono text-[10px] text-slate-400 mb-3">
+              <span>CALIBRATED FOR SNEHA</span>
+              <span id="matrixCounter">Permutation #247 of 1,000+</span>
+            </div>
+
+            <div class="bg-black/45 border-l-2 border-flirtNeon rounded-2xl p-3.5 text-xs text-slate-300 leading-relaxed" id="actionProtocol">
+              <strong class="font-mono uppercase text-flirtNeon block text-[10px] tracking-wider mb-0.5">Note To Self</strong>
+              Put the phone down for 3 seconds, stop biting your lip, and admit you loved reading that.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 2. SIDE-BY-SIDE UTILITY BAR (LEFT: 3D HEART ORBIT | RIGHT: QUICK DOPAMINE SHOT) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <div class="glass-card rounded-3xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-roseGlow">3D Heart Orbit</span>
+            <span class="text-base">💓</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3">
+            Hundreds of pulsing 3D hearts float around you. Drag to rotate or double-tap for a burst.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="triggerHeartSupernova()" class="flex-1 py-2 rounded-xl bg-rose-500/15 border border-rose-400/30 font-mono text-[10px] font-bold uppercase tracking-wider text-rose-200 hover:bg-roseGlow hover:text-black transition">
+            Burst ✨
+          </button>
+          <button type="button" onclick="resetCameraAngle()" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 font-mono text-[10px] uppercase tracking-wider text-slate-300 hover:bg-white/10 transition">
+            Center
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-3xl p-5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-mono text-[10px] uppercase tracking-wider text-roseGlow">Quick Dopamine</span>
+            <span class="text-base">🎲</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed mb-3" id="rouletteText">
+            "Tap Roll whenever you need an instant unforced smile."
+          </p>
+        </div>
+        <button type="button" onclick="spinCompliment()" class="w-full py-2 rounded-xl bg-gradient-to-r from-flirtNeon to-rose-600 text-white font-mono text-[10px] font-bold tracking-wider uppercase shadow-md shadow-rose-900/40 hover:scale-[1.02] active:scale-95 transition">
+          Roll Validation 🎲
+        </button>
+      </div>
+    </section>
+
+    <!-- 3. THE 'KUCH BHI' 500+ INDIAN CRAVING OVERRIDE WHEEL -->
+    <section class="glass-card rounded-3xl p-6 mb-8 text-center">
+      <div class="font-mono text-xs uppercase tracking-widest text-roseGlow mb-1 flex items-center justify-center gap-1.5">
+        <span>●</span> The 'Kuch Bhi' 500+ Food & Craving Override Wheel
+      </div>
+      <p class="text-xs text-slate-400 mb-3">When Sneha says "kuch bhi mangwa lo" for Indian snacks, lunch, dinner, or sweet cravings:</p>
+
+      <div class="flex flex-wrap justify-center gap-1.5 mb-4" id="foodFilterBar">
+        <button type="button" onclick="setFoodCategory('all', this)" class="food-cat-btn active px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider bg-roseGlow text-black font-bold transition">
+          All (500+)
+        </button>
+        <button type="button" onclick="setFoodCategory('snacks', this)" class="food-cat-btn px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition">
+          Indian Snacks 🥟
+        </button>
+        <button type="button" onclick="setFoodCategory('meals', this)" class="food-cat-btn px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition">
+          Lunch & Dinner 🍛
+        </button>
+        <button type="button" onclick="setFoodCategory('desserts', this)" class="food-cat-btn px-3 py-1 rounded-full font-mono text-[10px] uppercase tracking-wider bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 transition">
+          Sweets & Coffee 🍨
+        </button>
+      </div>
+
+      <div class="bg-black/50 border border-rose-400/20 rounded-2xl p-4 mb-4">
+        <div class="font-mono text-[10px] text-rose-300 uppercase tracking-widest mb-1" id="kuchBhiCategory">INDIAN STREET SNACKS • #142 OF 500+</div>
+        <div class="text-xl md:text-2xl font-bold text-white mb-1.5 transition-all duration-150" id="kuchBhiResult">Crispy Pani Puri & Ragda Pattice with Extra Teekha Pani 🥟</div>
+        <div class="font-script text-lg md:text-xl text-rose-200 leading-snug" id="kuchBhiDirective">"Zero debates permitted. Once the wheel locks, Sneha has to eat every single bite."</div>
+      </div>
+
+      <button type="button" onclick="spinKuchBhiWheel()" id="spinBtn" class="w-full py-3 rounded-full bg-gradient-to-r from-amber-500/20 via-rose-500/30 to-purple-500/20 border border-rose-400/40 text-xs font-mono font-semibold tracking-wider uppercase text-rose-200 hover:bg-roseGlow hover:text-black transition duration-300">
+        Spin 500+ Indian Cravings Slot Machine 🎰
+      </button>
+    </section>
+
+    <!-- 4. UPGRADED 50+ RANDOM GOLD SCRATCH-CARD & BIOMETRIC SENSOR -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <!-- Upgraded Gold Scratch-Off Note -->
+      <section class="glass-card rounded-3xl p-6 flex flex-col justify-between relative overflow-hidden">
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <div class="font-mono text-xs uppercase tracking-widest text-roseGlow flex items-center gap-1.5">
+              <span>●</span> Gold Scratch-Off Note
+            </div>
+            <span id="scratchPercentTag" class="font-mono text-[10px] text-amber-300/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-400/20">
+              0% Scratched
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Rub the metallic foil to reveal a hidden note for Sneha:</p>
+
+          <div class="scratch-container border border-amber-400/40 shadow-inner relative rounded-2xl overflow-hidden h-[155px]">
+            <div class="absolute inset-0 bg-gradient-to-br from-rose-950/80 via-[#120714] to-slate-950 p-4 flex flex-col justify-center items-center text-center">
+              <div id="scratchNoteHeader" class="font-mono text-[10px] text-amber-300 uppercase tracking-widest mb-1.5">
+                ✦ Secret Note #1 of 50 ✦
+              </div>
+              <p id="scratchNoteBody" class="font-script text-xl md:text-2xl text-rose-100 leading-snug">
+                "No matter how noisy life gets, taking care of your smile will always be the easiest decision."
+              </p>
+            </div>
+
+            <canvas id="scratchCanvas" class="transition-opacity duration-500"></canvas>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+          <button type="button" onclick="resetScratchFoil(false)" class="font-mono text-[10px] text-slate-400 hover:text-rose-300 uppercase tracking-wider transition">
+            ↺ Re-Cover
+          </button>
+          <button type="button" onclick="resetScratchFoil(true)" class="font-mono text-[10px] text-amber-300 hover:text-amber-200 font-bold uppercase tracking-wider flex items-center gap-1 transition">
+            <span>New Secret Note</span> ✨
+          </button>
+        </div>
+      </section>
+
+      <!-- Biometric Sensor -->
+      <section class="glass-card rounded-3xl p-6 text-center flex flex-col justify-between">
+        <div>
+          <div class="font-mono text-xs uppercase tracking-widest text-slate-400 mb-1">
+            Biometric Comfort Resonance
+          </div>
+          <p class="text-xs text-slate-400 mb-3">Press & hold core for 2s to sync warmth</p>
+
+          <div class="relative w-24 h-24 mx-auto flex items-center justify-center cursor-pointer">
+            <svg class="absolute top-0 left-0 w-24 h-24 transform -rotate-90 pointer-events-none">
+              <circle cx="48" cy="48" r="42" stroke="rgba(255,255,255,0.08)" stroke-width="4" fill="none"></circle>
+              <circle id="holdProgressCircle" cx="48" cy="48" r="42" stroke="#ff8fa3" stroke-width="4" stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round" fill="none" class="transition-all duration-75"></circle>
+            </svg>
+
+            <div id="touchCore" 
+                 onmousedown="startBiometricHold(event)" 
+                 onmouseup="endBiometricHold()" 
+                 onmouseleave="endBiometricHold()"
+                 ontouchstart="startBiometricHold(event)" 
+                 ontouchend="endBiometricHold()"
+                 class="w-16 h-16 rounded-full bg-gradient-to-tr from-rose-900/60 to-rose-400/40 border border-rose-300/60 flex items-center justify-center text-2xl text-roseGlow shadow-lg shadow-rose-900/50 transition-transform active:scale-95">
+              ♥
+            </div>
+          </div>
+        </div>
+
+        <div id="touchFeedback" class="font-script text-lg text-roseGlow min-h-[36px] flex items-center justify-center mt-2">
+          "You are always held in the warmest corner of this universe, Sneha."
+        </div>
+      </section>
+    </div>
+
+    <!-- 5. BLACK HOLE: BURN YOUR STRESS -->
+    <section class="glass-card rounded-3xl p-6 mb-8 max-w-2xl mx-auto">
+      <div class="font-mono text-xs uppercase tracking-widest text-roseGlow mb-1 flex items-center gap-1.5">
+        <span>●</span> Stress Vaporizer (Black Hole Mode)
+      </div>
+      <p class="text-xs text-slate-400 mb-3">Type whatever thought is frustrating or draining you right now, then release it into the quantum void:</p>
+
+      <textarea id="stressInput" rows="2" placeholder="Write here... (this will not be stored anywhere)" class="w-full bg-black/40 border border-white/10 rounded-2xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-roseGlow transition duration-300 resize-none mb-3"></textarea>
+
+      <button type="button" onclick="burnStressThought()" class="w-full py-2.5 rounded-full bg-gradient-to-r from-rose-500/20 via-rose-500/30 to-purple-500/20 border border-rose-400/40 text-xs font-mono font-semibold tracking-wider uppercase text-rose-200 hover:bg-roseGlow hover:text-black transition duration-300">
+        Disintegrate Into Cosmic Dust 🔥
+      </button>
+    </section>
+
+    <!-- Direct WhatsApp Transmission Gateway (+91 9595882171) -->
+    <section class="text-center pt-4">
+      <a id="whatsappTransmitBtn" 
+         href="https://wa.me/919595882171?text=Hey!%20Was%20exploring%20my%20Little%20Universe...%20this%203D%20space%20is%20genuinely%20so%20special%20%E2%9C%A8" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         class="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold text-sm tracking-wide shadow-xl shadow-emerald-950/50 hover:scale-[1.02] active:scale-95 transition duration-300">
+        <span>Transmit Direct Signal</span> 💬
+      </a>
+      <p class="font-mono text-[11px] text-slate-400 mt-4 tracking-wider">
+        A LITTLE UNIVERSE FOR SNEHA SHERKE • CRAFTED WITH CARE BY <span class="text-rose-300 font-semibold">RAGHAV</span>
+      </p>
+    </section>
+
+  </div>
+
+  <!-- JAVASCRIPT: FIXED AUDIO ENGINE, 3D HEARTS & INTERACTIVE MODULES -->
+  <script>
+    const TARGET_WHATSAPP_NUMBER = "919595882171";
+
+    /* =========================================================
+       0. FIXED BACKGROUND MUSIC CONTROLLER (gaurai.mp3)
+       ========================================================= */
+    const bgMusic = document.getElementById('bgMusic');
+    const musicIcon = document.getElementById('musicIcon');
+    const musicLabel = document.getElementById('musicLabel');
+    let userPausedManually = false;
+    let fileLoadError = false;
+
+    if (bgMusic) {
+      bgMusic.volume = 0.6;
+
+      bgMusic.addEventListener('error', () => {
+        fileLoadError = true;
+        if (musicIcon) musicIcon.innerText = '⚠️';
+        if (musicLabel) musicLabel.innerText = 'Check gaurai.mp3';
+      });
+
+      bgMusic.addEventListener('play', () => updateMusicButtonUI(true));
+      bgMusic.addEventListener('pause', () => updateMusicButtonUI(false));
+    }
+
+    function updateMusicButtonUI(playing) {
+      if (!musicIcon || !musicLabel || fileLoadError) return;
+      if (playing) {
+        musicIcon.innerText = '⏸️';
+        musicLabel.innerText = 'Playing';
+      } else {
+        musicIcon.innerText = '🎵';
+        musicLabel.innerText = 'Play Song';
+      }
+    }
+
+    function toggleBgMusic(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (!bgMusic) return;
+
+      if (bgMusic.paused) {
+        userPausedManually = false;
+        bgMusic.play().then(() => {
+          updateMusicButtonUI(true);
+        }).catch(err => {
+          console.warn('Playback issue:', err);
+          if (musicLabel) musicLabel.innerText = 'Tap Again';
+        });
+      } else {
+        userPausedManually = true;
+        bgMusic.pause();
+        updateMusicButtonUI(false);
+      }
+    }
+
+    // Automatically start gaurai.mp3 when user interacts with any button on screen
+    function tryAutoStartMusic(e) {
+      if (userPausedManually || !bgMusic || !bgMusic.paused) return;
+      if (e && e.target && e.target.closest('#musicToggleBtn')) return;
+      bgMusic.play().then(() => {
+        updateMusicButtonUI(true);
+      }).catch(() => {});
+    }
+    document.addEventListener('pointerdown', tryAutoStartMusic);
+
+    let scene, camera, renderer;
+    let beatingHeartSwarm, celestialRings, crystalHeart;
+    let floatingHearts = [];
+    let targetRotationX = 0, targetRotationY = 0;
+    let windowHalfX = window.innerWidth / 2;
+    let windowHalfY = window.innerHeight / 2;
+    let webglAvailable = true;
+    let supernovaParticles = [];
+    let heartParticleMat;
+    let sharedHeartTexture;
+    let activeMoodKey = 'flirt';
+
+    function createGlowingHeartTexture() {
+      const size = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+
+      ctx.clearRect(0, 0, size, size);
+      ctx.shadowColor = '#ff1e56';
+      ctx.shadowBlur = 16;
+
+      const cx = size / 2;
+      const cy = size / 2 - 22;
+      const s = 3.2;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + 5 * s);
+      ctx.bezierCurveTo(cx, cy, cx - 12 * s, cy - 5 * s, cx - 12 * s, cy + 4 * s);
+      ctx.bezierCurveTo(cx - 12 * s, cy + 12 * s, cx, cy + 20 * s, cx, cy + 24 * s);
+      ctx.bezierCurveTo(cx, cy + 20 * s, cx + 12 * s, cy + 12 * s, cx + 12 * s, cy + 4 * s);
+      ctx.bezierCurveTo(cx + 12 * s, cy - 5 * s, cx, cy, cx, cy + 5 * s);
+      ctx.closePath();
+      ctx.fill();
+
+      const texture = new THREE.CanvasTexture(canvas);
+      texture.needsUpdate = true;
+      return texture;
+    }
+
+    function createHeartShape() {
+      const x = 0, y = 0;
+      const h = new THREE.Shape();
+      h.moveTo(x + 0.25, y + 0.25);
+      h.bezierCurveTo(x + 0.25, y + 0.25, x + 0.2, y, x, y);
+      h.bezierCurveTo(x - 0.3, y, x - 0.3, y + 0.35, x - 0.3, y + 0.35);
+      h.bezierCurveTo(x - 0.3, y + 0.55, x - 0.1, y + 0.77, x + 0.25, y + 0.95);
+      h.bezierCurveTo(x + 0.6, y + 0.77, x + 0.8, y + 0.55, x + 0.8, y + 0.35);
+      h.bezierCurveTo(x + 0.8, y + 0.35, x + 0.8, y, x + 0.5, y);
+      h.bezierCurveTo(x + 0.35, y, x + 0.25, y + 0.25, x + 0.25, y + 0.25);
+      return h;
+    }
+
+    function init3D() {
+      const canvas = document.getElementById('webglCanvas');
+      try {
+        if (typeof THREE === 'undefined') {
+          throw new Error('Three.js library not loaded');
+        }
+        scene = new THREE.Scene();
+
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 19;
+
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
+        scene.add(ambientLight);
+
+        const frontLight = new THREE.PointLight(0xff2a70, 3.5, 60);
+        frontLight.position.set(0, 3, 14);
+        scene.add(frontLight);
+
+        const sideLight = new THREE.PointLight(0xff8fa3, 2.5, 50);
+        sideLight.position.set(-10, -5, 10);
+        scene.add(sideLight);
+
+        const rimLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        rimLight.position.set(5, 10, 10);
+        scene.add(rimLight);
+
+        sharedHeartTexture = createGlowingHeartTexture();
+        const particleCount = 650;
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i += 3) {
+          const r = 6 + Math.random() * 24;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+
+          positions[i] = r * Math.sin(phi) * Math.cos(theta);
+          positions[i + 1] = r * Math.sin(phi) * Math.sin(theta);
+          positions[i + 2] = r * Math.cos(phi) - 2;
+
+          colors[i] = 1.0;
+          colors[i + 1] = 0.25 + Math.random() * 0.45;
+          colors[i + 2] = 0.5 + Math.random() * 0.4;
+        }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        heartParticleMat = new THREE.PointsMaterial({
+          size: 0.95,
+          map: sharedHeartTexture,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.95,
+          alphaTest: 0.05,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        });
+
+        beatingHeartSwarm = new THREE.Points(geometry, heartParticleMat);
+        scene.add(beatingHeartSwarm);
+
+        celestialRings = new THREE.Group();
+        const ringGeo1 = new THREE.TorusGeometry(5.2, 0.035, 16, 80);
+        const ringMat1 = new THREE.MeshBasicMaterial({ color: 0xff1e56, transparent: true, opacity: 0.45 });
+        const ring1 = new THREE.Mesh(ringGeo1, ringMat1);
+        ring1.rotation.x = Math.PI / 3;
+        celestialRings.add(ring1);
+
+        const ringGeo2 = new THREE.TorusGeometry(6.6, 0.025, 16, 90);
+        const ringMat2 = new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.35 });
+        const ring2 = new THREE.Mesh(ringGeo2, ringMat2);
+        ring2.rotation.y = Math.PI / 4;
+        celestialRings.add(ring2);
+
+        scene.add(celestialRings);
+
+        const heartShape = createHeartShape();
+        const mainExtrudeSettings = {
+          depth: 0.45,
+          bevelEnabled: true,
+          bevelSegments: 6,
+          steps: 2,
+          bevelSize: 0.14,
+          bevelThickness: 0.16
+        };
+
+        const heartGeometry = new THREE.ExtrudeGeometry(heartShape, mainExtrudeSettings);
+        heartGeometry.center();
+
+        const heartMaterial = new THREE.MeshStandardMaterial({
+          color: 0xff1e56,
+          emissive: 0x700824,
+          emissiveIntensity: 0.85,
+          roughness: 0.18,
+          metalness: 0.35,
+          transparent: true,
+          opacity: 0.95
+        });
+
+        crystalHeart = new THREE.Mesh(heartGeometry, heartMaterial);
+        crystalHeart.scale.set(3.8, 3.8, 3.8);
+        crystalHeart.rotation.z = Math.PI;
+        scene.add(crystalHeart);
+
+        const miniExtrudeSettings = {
+          depth: 0.2,
+          bevelEnabled: true,
+          bevelSegments: 3,
+          steps: 1,
+          bevelSize: 0.06,
+          bevelThickness: 0.06
+        };
+        const miniHeartGeo = new THREE.ExtrudeGeometry(heartShape, miniExtrudeSettings);
+        miniHeartGeo.center();
+
+        const miniHeartMat = new THREE.MeshStandardMaterial({
+          color: 0xff4d6d,
+          emissive: 0x55061c,
+          emissiveIntensity: 0.7,
+          roughness: 0.25,
+          metalness: 0.25,
+          transparent: true,
+          opacity: 0.9
+        });
+
+        for (let i = 0; i < 45; i++) {
+          const mesh = new THREE.Mesh(miniHeartGeo, miniHeartMat.clone());
+          const scale = 0.65 + Math.random() * 0.95;
+          mesh.scale.set(scale, scale, scale);
+          mesh.rotation.z = Math.PI;
+
+          const distance = 5.0 + Math.random() * 11;
+          const theta = Math.random() * Math.PI * 2;
+          const phi = (Math.random() - 0.5) * Math.PI;
+
+          mesh.position.set(
+            distance * Math.cos(theta) * Math.cos(phi),
+            distance * Math.sin(phi),
+            distance * Math.sin(theta) * Math.cos(phi) - 1
+          );
+
+          scene.add(mesh);
+          floatingHearts.push({
+            mesh: mesh,
+            baseScale: scale,
+            rotSpeedX: (Math.random() - 0.5) * 0.02,
+            rotSpeedY: (Math.random() - 0.5) * 0.025,
+            pulseOffset: Math.random() * Math.PI * 2
+          });
+        }
+
+        window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('mousemove', onMouseMove, false);
+        window.addEventListener('touchmove', onTouchMove, { passive: true });
+        window.addEventListener('dblclick', triggerHeartSupernova);
+      } catch (err) {
+        console.warn("WebGL fallback initiated:", err);
+        webglAvailable = false;
+        if (canvas) canvas.style.display = 'none';
+      }
+    }
+
+    function onWindowResize() {
+      if (!webglAvailable) return;
+      windowHalfX = window.innerWidth / 2;
+      windowHalfY = window.innerHeight / 2;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onMouseMove(event) {
+      if (!webglAvailable) return;
+      targetRotationX = (event.clientY - windowHalfY) * 0.0003;
+      targetRotationY = (event.clientX - windowHalfX) * 0.0003;
+    }
+
+    function onTouchMove(event) {
+      if (!webglAvailable || !event.touches.length) return;
+      targetRotationX = (event.touches[0].clientY - windowHalfY) * 0.0004;
+      targetRotationY = (event.touches[0].clientX - windowHalfX) * 0.0004;
+    }
+
+    function resetCameraAngle() {
+      targetRotationX = 0;
+      targetRotationY = 0;
+      if (crystalHeart) crystalHeart.rotation.set(0, 0, Math.PI);
+    }
+
+    function triggerHeartSupernova() {
+      if (!webglAvailable || !scene) return;
+      const burstCount = 65;
+      const burstGeo = new THREE.BufferGeometry();
+      const burstPos = new Float32Array(burstCount * 3);
+      const velocities = [];
+
+      for (let i = 0; i < burstCount; i++) {
+        burstPos[i * 3] = 0;
+        burstPos[i * 3 + 1] = 0;
+        burstPos[i * 3 + 2] = 0;
+
+        velocities.push({
+          x: (Math.random() - 0.5) * 0.75,
+          y: (Math.random() - 0.5) * 0.75,
+          z: (Math.random() - 0.5) * 0.75
+        });
+      }
+
+      burstGeo.setAttribute('position', new THREE.BufferAttribute(burstPos, 3));
+      const burstMat = new THREE.PointsMaterial({
+        color: 0xff8fa3,
+        map: sharedHeartTexture,
+        size: 1.1,
+        transparent: true,
+        opacity: 1,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+
+      const burstMesh = new THREE.Points(burstGeo, burstMat);
+      scene.add(burstMesh);
+      supernovaParticles.push({ mesh: burstMesh, vels: velocities, life: 1.0 });
+
+      floatingHearts.forEach(fh => {
+        fh.mesh.scale.multiplyScalar(1.38);
+      });
+
+      playSynthHeartbeat(580, 0.08);
+    }
+
+    function animate() {
+      if (!webglAvailable) return;
+      requestAnimationFrame(animate);
+
+      const time = Date.now() * 0.0015;
+
+      const pulseRate = activeMoodKey === 'flirt' ? 3.8 : 2.6;
+      const phase = (time * pulseRate) % (Math.PI * 2);
+      let pulse = 1.0;
+      if (phase < 0.6) {
+        pulse += Math.sin(phase * (Math.PI / 0.6)) * 0.16;
+      } else if (phase >= 0.8 && phase < 1.4) {
+        pulse += Math.sin((phase - 0.8) * (Math.PI / 0.6)) * 0.25;
+      }
+
+      if (beatingHeartSwarm && heartParticleMat) {
+        beatingHeartSwarm.rotation.y = time * 0.045;
+        beatingHeartSwarm.rotation.x = Math.sin(time * 0.3) * 0.12;
+        heartParticleMat.size = 0.95 * pulse;
+      }
+
+      if (celestialRings) {
+        celestialRings.rotation.y = -time * 0.06;
+        celestialRings.rotation.x = Math.sin(time * 0.5) * 0.2;
+      }
+
+      if (crystalHeart) {
+        crystalHeart.scale.set(3.8 * pulse, 3.8 * pulse, 3.8 * pulse);
+        crystalHeart.rotation.y += (targetRotationY * 5 - crystalHeart.rotation.y) * 0.05;
+        crystalHeart.rotation.x += (targetRotationX * 5 - (crystalHeart.rotation.x - Math.PI)) * 0.05;
+      }
+
+      floatingHearts.forEach(fh => {
+        fh.mesh.position.y += Math.sin(time * 1.5 + fh.pulseOffset) * 0.015;
+        fh.mesh.position.x += Math.cos(time * 0.8 + fh.pulseOffset) * 0.008;
+        fh.mesh.rotation.y += fh.rotSpeedY;
+        fh.mesh.rotation.x += fh.rotSpeedX;
+
+        const heartScale = fh.baseScale * (0.92 + (pulse - 1.0) * 1.4);
+        fh.mesh.scale.set(heartScale, heartScale, heartScale);
+      });
+
+      for (let i = supernovaParticles.length - 1; i >= 0; i--) {
+        const p = supernovaParticles[i];
+        p.life -= 0.02;
+        const posArr = p.mesh.geometry.attributes.position.array;
+        for (let j = 0; j < p.vels.length; j++) {
+          posArr[j * 3] += p.vels[j].x;
+          posArr[j * 3 + 1] += p.vels[j].y;
+          posArr[j * 3 + 2] += p.vels[j].z;
+        }
+        p.mesh.geometry.attributes.position.needsUpdate = true;
+        p.mesh.material.opacity = p.life;
+
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          supernovaParticles.splice(i, 1);
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function update3DThemeColor(hexColor) {
+      if (!webglAvailable || !crystalHeart) return;
+      crystalHeart.material.color.set(hexColor);
+      crystalHeart.material.emissive.set(hexColor).multiplyScalar(0.35);
+      if (celestialRings && celestialRings.children[0]) {
+        celestialRings.children[0].material.color.set(hexColor);
+      }
+      floatingHearts.forEach(fh => {
+        fh.mesh.material.color.set(hexColor);
+        fh.mesh.material.emissive.set(hexColor).multiplyScalar(0.3);
+      });
+    }
+
+    /* =========================================================
+       2. WEB AUDIO API SYNTHESIZER
+       ========================================================= */
+    let audioCtx = null;
+    function playSynthHeartbeat(freq = 110, duration = 0.25) {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        if (!audioCtx) audioCtx = new AudioContextClass();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + duration);
+
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    /* =========================================================
+       3. TOP 1,000+ ENGLISH FLIRT COMBINATORIAL MATRIX (10x10x10)
+       ========================================================= */
+    const englishFlirtMatrix = {
+      openers: [
+        "Honestly Sneha, smiling at your phone like that should officially be illegal,",
+        "I've been analyzing this closely, Sneha, and you have this completely unfair habit:",
+        "You pretend to be so unbothered and strict, but here's the truth,",
+        "Just so we are clear, Sneha, whenever you take over the music queue in the car,",
+        "Not to inflate your ego today, but sitting beside you during an empty highway cruise",
+        "You have this quiet, effortless superpower where you don't even have to try,",
+        "I need you to stop biting your lip and pretending you aren't paying attention,",
+        "Between your innocent 'kuch bhi' tantrums and that little dimpled smile,",
+        "Even on your most chaotic days when you swear you look like a mess,",
+        "You can pretend all you want that you don't secretly love being teased,"
+      ],
+      teases: [
+        "you somehow manage to reset my entire afternoon in two seconds flat.",
+        "you look dangerously breathtaking while pretending to be deep in thought.",
+        "you make every other plan in this city feel completely ordinary and boring.",
+        "nobody has the power to distract people from their actual work the way you do.",
+        "that sudden eye-roll followed by a soft, shy smile is genuinely unfair.",
+        "taking 25 minutes to decide on dessert is officially the most adorable crime.",
+        "the way your eyes light up over cold coffee and inside jokes is unmatched.",
+        "you command the passenger seat like you legally own every single highway lane.",
+        "your genuine laugh carries more warmth than this entire universe combined.",
+        "you carry an elegance that makes everyone else in the room fade into blur."
+      ],
+      punchlines: [
+        "So go ahead, smile at the screen again—I know you're doing it right now.",
+        "Now close this message, drink your cold coffee, and know you're cherished.",
+        "And yes, the front seat aux cord remains permanently reserved under your name.",
+        "So stop arguing with your food cravings and let me handle the dessert order.",
+        "Consider this your official reminder that you are effortlessly unmatched.",
+        "Now tell me: when are we taking that next spontaneous late-night coffee drive?",
+        "Don't worry, your secrets and all your silly tantrums are completely safe with me.",
+        "You're a rare one, Sneha Sherke, and having you around is the easiest win.",
+        "Just keep that radiant crown straight and never stop being this charming.",
+        "Now admit it with a straight face: this just made your entire day ten times better."
+      ],
+      hinglishEchoes: [
+        "फोन देखकर ऐसे मुस्कुराना बंद करो Sneha, सामने वाले का ध्यान भटकाने में माहिर हो तुम।",
+        "तुम्हारा ये थोड़ा सा गुस्सा और फिर धीरे से मुस्कुरा देना... सच में सबसे कातिल अदा है।",
+        "कार में तुम्हारे पसंदीदा गानों के साथ खाली सड़क—यही असली सुकून है।",
+        "तुम्हारा ये 'कुछ भी' बोलकर नखरा दिखाना हमेशा मेरा फेवरेट हिस्सा रहेगा।",
+        "तुम जैसी हो बिना किसी फिल्टर के, उतनी ही परफेक्ट और खूबसूरत लगती हो।",
+        "सच कहें तो पूरा दिन कितना भी थका देने वाला हो, तुम्हारी एक मुस्कान सब ठीक कर देती है।"
+      ]
+    };
+
+    const proceduralLibrary = {
+      flirt: {
+        tag: "1,000+ ENGLISH FLIRT MATRIX",
+        color: 0xff1e56,
+        glowStyle: "radial-gradient(circle, rgba(255, 30, 86, 0.45) 0%, transparent 70%)",
+        protocol: "Put the phone down for 3 seconds, stop biting your lip, and admit you loved reading that.",
+        waPrompt: "Just reading the flirt matrix in my little universe... you really know how to make me smile 😏✨"
+      },
+      stress: {
+        tag: "WORK BURNOUT PURGE",
+        color: 0xff8fa3,
+        glowStyle: "radial-gradient(circle, rgba(255, 143, 163, 0.28) 0%, transparent 70%)",
+        protocol: "Put your phone screen-down for 60 seconds, drink half a glass of cold water, and drop your shoulders. The world won't end in two minutes.",
+        openers: ["Sneha, pause whatever deadline is screaming at you.", "Step back from that laptop screen for just 60 seconds."],
+        cores: ["You handle responsibilities so effortlessly that people forget you need a breather too.", "Most tasks feel 10x more critical than they actually are."],
+        anchors: ["Drink half a glass of cold water and reset.", "Shut that laptop down right on time today."],
+        waPrompt: "Work was genuinely hectic today... needed this quiet corner in my little universe ✨"
+      },
+      low: {
+        tag: "OVERTHINKING SHIELD",
+        color: 0x4cc9f0,
+        glowStyle: "radial-gradient(circle, rgba(76, 201, 240, 0.28) 0%, transparent 70%)",
+        protocol: "Step away from the screen. Look out the window, take 3 slow breaths, and remember that 90% of what you're worrying about won't matter next month.",
+        openers: ["Stop replaying that scenario in your head, Sneha.", "Breathe in deep: you are safe and valued."],
+        cores: ["Small things feel 10x heavier when your energy is low.", "You bring a genuine warmth that makes everything lighter."],
+        anchors: ["Rest easy tonight, Sneha.", "Tomorrow is a clean brand new slate."],
+        waPrompt: "Was overthinking a bit and opened my universe... feeling much calmer now 🤍"
+      },
+      angry: {
+        tag: "FIERY MOOD COOL-DOWN",
+        color: 0xf72585,
+        glowStyle: "radial-gradient(circle, rgba(247, 37, 133, 0.3) 0%, transparent 70%)",
+        protocol: "Unclench your jaw, roll your shoulders back, and don't send that heated text draft yet. Save the spicy roasting for later.",
+        openers: ["Whoever tested your patience today has very poor survival instincts.", "Don't give them the satisfaction of ruining your mood."],
+        cores: ["You look way too good to be scowling at your phone.", "Silence and unbothered elegance is the most brutal comeback."],
+        anchors: ["Save the spicy details for when we talk later.", "Let them fade into irrelevance."],
+        waPrompt: "Someone seriously pushed my buttons today 😤 needed to see this!"
+      },
+      drive: {
+        tag: "RESTLESS CRUISE VECTORS",
+        color: 0xffd166,
+        glowStyle: "radial-gradient(circle, rgba(255, 209, 102, 0.28) 0%, transparent 70%)",
+        protocol: "Pick your top 3 favorite songs of all time, put your earphones on full volume, and let your mind completely drift for 10 minutes.",
+        openers: ["Boredom is just your brain telling you that you're overdue for an outing.", "Time for a spontaneous vibe check."],
+        cores: ["You need a smooth highway drive with zero destinations and the playlist on full volume.", "A spontaneous coffee run is 100% justified right now."],
+        anchors: ["Pick a playlist and demand an evening highway drive.", "The aux cord is waiting for you."],
+        waPrompt: "I'm genuinely bored today... we definitely need an open drive soon 🚗"
+      },
+      happy: {
+        tag: "QUEEN GLOW AMPLIFIER",
+        color: 0xff8fa3,
+        glowStyle: "radial-gradient(circle, rgba(255, 143, 163, 0.35) 0%, transparent 70%)",
+        protocol: "Lock in this feeling. Whatever good news or radiant energy you're feeling today, you completely earned it.",
+        openers: ["That confidence looks unfairly good on you today.", "Keep that radiant smile locked in."],
+        cores: ["You have a natural grace and magnetism that doesn't need to try hard to be noticed.", "Seeing you happy is honestly the best sight."],
+        anchors: ["Celebrate with your favorite dessert tonight.", "Keep shining, Sneha."],
+        waPrompt: "Mood is 10/10 today! My little universe matched my vibe perfectly ✨"
+      },
+      night: {
+        tag: "1:00 AM SUKOON",
+        color: 0x9b5de5,
+        glowStyle: "radial-gradient(circle, rgba(155, 93, 229, 0.3) 0%, transparent 70%)",
+        protocol: "Dim your screen brightness all the way down, sink your shoulders into the pillow, and stop checking the time. Rest your mind.",
+        openers: ["Sneha, the world has gone quiet for a reason.", "Put the phone down and give your eyes a rest."],
+        cores: ["Everything looks twice as complicated at 1:00 AM.", "You did everything you could today, and that is more than enough."],
+        anchors: ["Deep breath, phone away, sweet dreams.", "Sleep well, Sneha."],
+        waPrompt: "Couldn't sleep, was just reading the 1:00 AM notes... putting the phone down now 🌙"
+      },
+      cravings: {
+        tag: "THE 'KUCH BHI' CRAVING OVERRIDE",
+        color: 0xf39c12,
+        glowStyle: "radial-gradient(circle, rgba(243, 156, 18, 0.28) 0%, transparent 70%)",
+        protocol: "Answering 'kuch bhi' is your legal right. Stop analyzing the menu and treat yourself to whatever sweet comfort you're imagining.",
+        openers: ["That sudden sweet tooth craving cannot be ignored.", "Comfort food is medically essential today."],
+        cores: ["Whatever sweet craving you're denying yourself right now, go order it.", "Good food tastes 10x better when celebrating surviving the day."],
+        anchors: ["Go order that dessert right now.", "Life is sweet, but dessert makes it official."],
+        waPrompt: "I'm having the biggest sweet craving right now... waffles or ice cream? 🍰"
+      },
+      nostalgic: {
+        tag: "NOSTALGIC WARMTH ARCHIVE",
+        color: 0x00b4d8,
+        glowStyle: "radial-gradient(circle, rgba(0, 180, 216, 0.28) 0%, transparent 70%)",
+        protocol: "Close your eyes and revisit your favorite quiet memory. The best moments are preserved permanently in time.",
+        openers: ["Sometimes a quiet evening brings back the sweetest memories.", "Remember those drives where we talked about everything?"],
+        cores: ["From late night calls where nobody hung up to quiet car rides, every chapter has been golden.", "You've brought a calm, steady light into everyday routines."],
+        anchors: ["Cherishing every small memory with you.", "The best chapters are still being written."],
+        waPrompt: "Was just thinking about some of our past drives and memories... this brought such a warm smile 🤍"
+      },
+      blanket: {
+        tag: "ZERO-PRESSURE RECHARGE",
+        color: 0xa8dadc,
+        glowStyle: "radial-gradient(circle, rgba(168, 218, 220, 0.28) 0%, transparent 70%)",
+        protocol: "Wrap yourself in the softest blanket, put your phone on do-not-disturb, and do absolutely nothing. You have zero obligations right now.",
+        openers: ["Low energy days don't need an explanation or an apology, Sneha.", "Permission granted to wrap up like a burrito."],
+        cores: ["Doing absolutely nothing is not wasted time; it's how you heal and reset.", "You don't need to be productive every single hour."],
+        anchors: ["Stay warm, cozy, and completely guilt-free.", "Zero expectations today. Just breathe."],
+        waPrompt: "Officially in blanket mode with zero energy... this was the exact comfort note I needed 🛋️"
+      }
+    };
+
+    function setMood(moodKey, btnElement) {
+      activeMoodKey = moodKey;
+      document.querySelectorAll('.mood-pill').forEach(btn => {
+        btn.classList.remove('active', 'border-flirtNeon/60', 'shadow-md', 'shadow-rose-950/50', 'bg-gradient-to-r', 'from-flirtNeon/20', 'to-rose-500/10');
+        btn.classList.add('border-transparent', 'bg-white/[0.02]');
+        const dot = btn.querySelector('.rounded-full');
+        if (dot) dot.remove();
+        const label = btn.querySelector('span:last-child');
+        if (label) {
+          label.classList.remove('font-bold', 'text-rose-200');
+          label.classList.add('font-medium', 'text-slate-300');
+        }
+      });
+
+      if (btnElement) {
+        btnElement.classList.remove('border-transparent', 'bg-white/[0.02]');
+        btnElement.classList.add('active', 'border-flirtNeon/60', 'shadow-md', 'shadow-rose-950/50', 'bg-gradient-to-r', 'from-flirtNeon/20', 'to-rose-500/10');
+        const label = btnElement.querySelector('span:last-child');
+        if (label) {
+          label.classList.remove('font-medium', 'text-slate-300');
+          label.classList.add('font-bold', 'text-rose-200');
+        }
+        const indicator = document.createElement('span');
+        indicator.className = 'w-1.5 h-1.5 rounded-full bg-flirtNeon';
+        btnElement.appendChild(indicator);
+      }
+
+      const data = proceduralLibrary[moodKey];
+      document.getElementById('ambientGlow').style.background = data.glowStyle;
+      update3DThemeColor(data.color);
+
+      document.getElementById('activeMoodTag').innerText = data.tag;
+      document.getElementById('actionProtocol').innerHTML = `
+        <strong class="font-mono uppercase text-flirtNeon block text-[10px] tracking-wider mb-0.5">Note To Self</strong>
+        ${data.protocol}
+      `;
+
+      const encoded = encodeURIComponent(data.waPrompt);
+      document.getElementById('whatsappTransmitBtn').href = `https://wa.me/${TARGET_WHATSAPP_NUMBER}?text=${encoded}`;
+      generateProceduralMessage();
+    }
+
+    function generateProceduralMessage() {
+      const data = proceduralLibrary[activeMoodKey];
+      const messageElem = document.getElementById('messageDisplay');
+      const hindiElem = document.getElementById('shayariHindiDisplay');
+
+      messageElem.style.opacity = '0';
+      if (hindiElem) hindiElem.style.opacity = '0';
+
+      setTimeout(() => {
+        if (activeMoodKey === 'flirt') {
+          const op = englishFlirtMatrix.openers[Math.floor(Math.random() * englishFlirtMatrix.openers.length)];
+          const te = englishFlirtMatrix.teases[Math.floor(Math.random() * englishFlirtMatrix.teases.length)];
+          const pu = englishFlirtMatrix.punchlines[Math.floor(Math.random() * englishFlirtMatrix.punchlines.length)];
+          const hi = englishFlirtMatrix.hinglishEchoes[Math.floor(Math.random() * englishFlirtMatrix.hinglishEchoes.length)];
+
+          messageElem.innerText = `"${op} ${te} ${pu}"`;
+          messageElem.style.opacity = '1';
+
+          if (hindiElem) {
+            hindiElem.style.display = 'block';
+            hindiElem.innerHTML = `"${hi}"`;
+            hindiElem.style.opacity = '1';
+          }
+
+          const randCount = Math.floor(Math.random() * 1000) + 1;
+          document.getElementById('matrixCounter').innerText = `Permutation #${randCount} of 1,000+`;
+        } else {
+          if (hindiElem) hindiElem.style.display = 'none';
+          const o = data.openers[Math.floor(Math.random() * data.openers.length)];
+          const c = data.cores[Math.floor(Math.random() * data.cores.length)];
+          const a = data.anchors[Math.floor(Math.random() * data.anchors.length)];
+
+          messageElem.innerText = `"${o} ${c} ${a}"`;
+          messageElem.style.opacity = '1';
+
+          const randVariation = Math.floor(Math.random() * 1500) + 1;
+          document.getElementById('matrixCounter').innerText = `Resonance #${randVariation} of 1,728`;
+        }
+      }, 150);
+    }
+
+    /* =========================================================
+       4. COMPLIMENT ROULETTE & 500+ INDIAN FOOD CRAVING OVERRIDE ENGINE
+       ========================================================= */
+    const complimentVault = [
+      "Your eye-roll when someone talks nonsense: 10/10 masterclass.",
+      "Effortlessly looking stunning while complaining about having nothing to wear.",
+      "The precision with which you take over the car music before seatbelt clicks.",
+      "Smiling at your phone right now like you just got caught being adorable.",
+      "Deciding what to eat on the first attempt: 0/10. Still cherished 100% though.",
+      "Your genuine laugh resets even the most chaotic afternoon in two seconds."
+    ];
+
+    function spinCompliment() {
+      const q = complimentVault[Math.floor(Math.random() * complimentVault.length)];
+      const el = document.getElementById('rouletteText');
+      el.style.opacity = '0';
+      setTimeout(() => {
+        el.innerText = `"${q}"`;
+        el.style.opacity = '1';
+      }, 120);
+      playSynthHeartbeat(320, 0.1);
+    }
+
+    const indianFoodMatrix = {
+      snacks: {
+        label: "INDIAN STREET SNACKS",
+        dishes: [
+          "Crispy Pani Puri & Ragda Pattice with Extra Teekha Pani 🥟",
+          "Mumbai Style Butter Vada Pav & Fried Green Chilli 🍔",
+          "Tandoori Paneer Momos with Spicy Schezwan Dip 🥟",
+          "Hot Samosa Chaat with Dahi, Sev & Tamarind Chutney 🍲",
+          "Cheese Burst Masala Dosa with Coconut Chutney & Sambar 🥞",
+          "Loaded Pav Bhaji with Extra Amul Butter & Roasted Pav 🍛",
+          "Peri-Peri Fries & Crispy Corn Salt & Pepper 🍟",
+          "Aloo Tikki Chole Chaat with Mint Chutney 🥗",
+          "Spiced Maggi Masala with Cheese & Veggies 🍜",
+          "Dabeli with Roasted Peanuts & Pomegranate 🥯",
+          "Crispy Kachori Sabzi with Sweet Jalebi 🥨",
+          "Paneer Tikka Roll with Mint Mayo 🌯",
+          "Chilli Paneer Dry with Garlic Hakka Noodles 🥡",
+          "Misal Pav with Extra Tarri & Farsan 🌶️",
+          "Bhel Puri & Sev Puri Evening Platter 🥗"
+        ],
+        pairings: [
+          "paired with Masala Cutting Chai in kulhad ☕",
+          "with chilled Nimbu Soda & extra chat masala 🍋",
+          "with extra spicy green chutney on the side 🌶️",
+          "followed by a quick street-side ice gola 🍧",
+          "served piping hot right on time 🔥"
+        ],
+        directives: [
+          "Zero debates permitted. Once the wheel locks, Sneha has to eat every single bite.",
+          "Indecision penalty applied! You're not allowed to say 'pet bhar gaya' after two bites.",
+          "Street food therapy is medically approved for resetting chaotic afternoons.",
+          "Don't even think about counting calories today—just enjoy the spice."
+        ]
+      },
+      meals: {
+        label: "ROYAL INDIAN LUNCH & DINNER",
+        dishes: [
+          "Paneer Butter Masala with Butter Garlic Naan & Jeera Rice 🍛",
+          "Hyderabadi Dum Biryani with Mirchi Ka Salan & Burani Raita 🍲",
+          "Dal Makhani, Kadhai Paneer & Tandoori Roti Platter 🥘",
+          "Chole Bhature with Pickled Onions & Sweet Lassi 🫓",
+          "Rajma Chawal with Papad, Ghee & Achar 🍚",
+          "Palak Paneer with Missi Roti & Boondi Raita 🥬",
+          "Shahi Paneer, Veg Pulao & Stuffed Kulcha Feast 🍽️",
+          "Malai Kofta with Laccha Paratha & Mint Chutney 🥘",
+          "South Indian Mini Thali with Idli, Vada, Dosa & Curd Rice 🍛",
+          "Butter Chicken / Paneer Tikka Masala with Roomali Roti 🍗",
+          "Paneer Lababdar with Kashmiri Pulao & Roasted Papad 🍲",
+          "Tawa Pulao with Cheese & Extra Pav Bhaji Gravy 🍚",
+          "Dal Tadka, Bhindi Masala & Phulka Ghar-Style Thali 🏡",
+          "Mexican Paneer Rice Bowl with Salsa & Nachos 🥗",
+          "Wood-Fired Farmhouse Cheese Pizza & Garlic Bread 🍕"
+        ],
+        pairings: [
+          "with chilled Sweet Patiala Lassi 🥛",
+          "with Masala Chaas & roasted papad 🥗",
+          "with mint raita & caramelized onions 🧅",
+          "with iced peach tea to wash it down 🍹",
+          "followed by a 2-hour guilt-free food coma 😴"
+        ],
+        directives: [
+          "Answering 'kuch bhi khana hai' automatically delegates full ordering authority to this wheel.",
+          "Dinner is officially decided. No 'let me check Zomato for 30 more minutes' allowed.",
+          "Proper royal meal required after handling the whole day like a boss.",
+          "Order placed in destiny. Sit back and wait for the doorbell."
+        ]
+      },
+      desserts: {
+        label: "MIDNIGHT SWEETS & DRINKS",
+        dishes: [
+          "Belgian Waffle with Melted Nutella & Vanilla Ice Cream 🧇",
+          "Hot Gulab Jamun with Cold Rabri 🍨",
+          "Chilled Kesar Rasmalai & Pistachio Crumble 🍮",
+          "Thick Cold Coffee with Chocolate Brownie Crush ☕",
+          "Sizzling Chocolate Brownie with Hot Fudge Sauce 🍫",
+          "Gajar Ka Halwa with Roasted Cashews & Almonds 🥕",
+          "Belgian Dark Chocolate Pastry & Hazelnut Frappe 🍰",
+          "Mango Mastani / Strawberry Cream Bowl 🍓",
+          "Motichoor Ladoo & Warm Kesar Milk 🥛",
+          "Tiramisu Jar & Iced Caramel Macchiato 🍮",
+          "Rabri Jalebi Crisp Midnight Combo 🥨",
+          "Lotus Biscoff Cheesecake Slice 🍰",
+          "Tender Coconut Ice Cream Scoop 🥥",
+          "Hot Chocolate with Marshmallows 🍫",
+          "Kulfi Falooda with Rose Syrup & Sabja 🍧"
+        ],
+        pairings: [
+          "with zero sharing allowed (unless Sneha feels generous) 😏",
+          "served chilled at midnight while watching your favorite show 🎬",
+          "with extra chocolate drizzle on top 🍫",
+          "as mandatory compensation for surviving today's stress ✨",
+          "with an extra spoon just in case 🥄"
+        ],
+        directives: [
+          "Dessert goes straight to the heart, not the stomach—scientific fact.",
+          "Sweet tooth override activated. Saying 'no' is legally invalid right now.",
+          "A little sugar rush to keep that dimpled smile active all night.",
+          "Consider this your official dessert prescription for today."
+        ]
+      }
+    };
+
+    let selectedFoodCat = 'all';
+
+    function setFoodCategory(cat, btn) {
+      selectedFoodCat = cat;
+      document.querySelectorAll('.food-cat-btn').forEach(b => {
+        b.classList.remove('active', 'bg-roseGlow', 'text-black', 'font-bold');
+        b.classList.add('bg-white/5', 'text-slate-300');
+      });
+      if (btn) {
+        btn.classList.add('active', 'bg-roseGlow', 'text-black', 'font-bold');
+        btn.classList.remove('bg-white/5', 'text-slate-300');
+      }
+      spinKuchBhiWheel();
+    }
+
+    function getRandomIndianFoodItem() {
+      const keys = selectedFoodCat === 'all' ? ['snacks', 'meals', 'desserts'] : [selectedFoodCat];
+      const chosenKey = keys[Math.floor(Math.random() * keys.length)];
+      const bucket = indianFoodMatrix[chosenKey];
+
+      const dish = bucket.dishes[Math.floor(Math.random() * bucket.dishes.length)];
+      const pairing = bucket.pairings[Math.floor(Math.random() * bucket.pairings.length)];
+      const dir = bucket.directives[Math.floor(Math.random() * bucket.directives.length)];
+      const itemNum = Math.floor(Math.random() * 525) + 1;
+
+      return {
+        category: `${bucket.label} • #${itemNum} OF 525+ CRAVINGS`,
+        food: `${dish} ${pairing}`,
+        dir: dir
+      };
+    }
+
+    function spinKuchBhiWheel() {
+      const btn = document.getElementById('spinBtn');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      let counter = 0;
+      const interval = setInterval(() => {
+        const temp = getRandomIndianFoodItem();
+        document.getElementById('kuchBhiResult').innerText = temp.food;
+        document.getElementById('kuchBhiCategory').innerText = temp.category;
+        counter++;
+        playSynthHeartbeat(200 + counter * 20, 0.05);
+        if (counter > 10) {
+          clearInterval(interval);
+          const finalPick = getRandomIndianFoodItem();
+          document.getElementById('kuchBhiResult').innerText = finalPick.food;
+          document.getElementById('kuchBhiCategory').innerText = finalPick.category;
+          document.getElementById('kuchBhiDirective').innerText = `"${finalPick.dir}"`;
+          btn.disabled = false;
+        }
+      }, 65);
+    }
+
+    /* =========================================================
+       5. UPGRADED 50+ RANDOM SECRET NOTES SCRATCH-CARD ENGINE
+       ========================================================= */
+    const secretScratchNotes = [
+      "No matter how noisy life gets, taking care of your smile will always be the easiest decision.",
+      "You have this rare magic of making ordinary evenings feel like my favorite memory.",
+      "Even when you say 'kuch bhi' or act stubborn, you're still my favorite person to tease.",
+      "Whenever you feel overwhelmed, remember there is always a quiet corner cheering for you.",
+      "That unforced laugh of yours is genuinely the best soundtrack to any day, Sneha.",
+      "You don't have to carry everything alone—take a deep breath and let yourself be pampered.",
+      "Front seat playlist control and midnight dessert runs are permanently reserved for you.",
+      "Out of everyone in this chaotic world, your calm and grace stand completely unmatched.",
+      "Honestly, watching you smile at your phone like this is my favorite part of the day.",
+      "You are way stronger than you give yourself credit for, and way cuter when you're annoyed.",
+      "If peace of mind had a face, it would look a lot like you on a quiet evening drive.",
+      "No matter how busy the schedule gets, you will always be a top priority—never an option.",
+      "Your tiny eye-rolls and dramatic sighs are secretly the highlight of my entire week.",
+      "Even on the days you feel tired or quiet, your presence alone makes everything feel right.",
+      "Consider this your golden ticket for an instant cold coffee or waffle run—no questions asked.",
+      "You deserve the kind of happiness that makes you forget to check your phone for hours.",
+      "Whenever you doubt yourself, pause and remember how effortlessly you brighten everyone's mood.",
+      "Some people just feel like home, and Sneha, you carry that warmth wherever you go.",
+      "Stop overthinking tonight—everything you're worried about is going to work out beautifully.",
+      "You look dangerously good even when you're complaining about having nothing to wear.",
+      "One genuine laugh from you has the power to fix even the most exhausting afternoon.",
+      "You never have to pretend to be strong here; this space is built purely for your comfort.",
+      "From silly inside jokes to quiet late-night talks, every moment with you is a keeper.",
+      "Keep your crown straight, Sneha—the world hasn't even seen your best chapter yet.",
+      "Just a secret reminder: you are deeply admired, respected, and cherished more than you know.",
+      "Whenever work drains your energy, remember there's a chocolate brownie waiting with your name on it.",
+      "Your kindness is your superpower, even on the days when people forget to say thank you.",
+      "You make even the simplest street food craving feel like a five-star date.",
+      "If I could bottle up your vibe, the whole world would instantly be a calmer place.",
+      "Don't let anyone dim that spark in your eyes—it's honestly one in a million.",
+      "You have zero idea how effortless it is to care about someone as genuine as you.",
+      "Late-night highway breeze + your favorite playlist = the ultimate therapy session.",
+      "Even your 'I'm fine' when you're clearly hungry is adorable—now go order something sweet!",
+      "You are the plot twist that made everything suddenly make sense.",
+      "Take a slow breath right now: you are safe, valued, and never an inconvenience.",
+      "Every time you scratch this card, remember someone is genuinely rooting for your happiness.",
+      "Your messy hair and sleepy voice at night beat every filtered photo on the internet.",
+      "You bring a softness to chaotic days that no amount of coffee ever could.",
+      "Never settle for anything less than pure effort, genuine laughs, and unlimited desserts.",
+      "You're the only person allowed to hijack the car Bluetooth before the engine even starts.",
+      "May your coffee always be strong, your eyeliner always even, and your heart always light.",
+      "Behind that confident attitude is the softest, purest heart—and it deserves the world.",
+      "Whenever you feel lonely, just open this universe and remember you're never truly alone.",
+      "You turn normal Tuesday evenings into memories worth replaying.",
+      "Your smile is the only notification I actually look forward to seeing.",
+      "Rest your mind tonight, Sneha—tomorrow belongs to you.",
+      "No filter, no drama, just you being effortlessly unforgettable.",
+      "You've survived 100% of your toughest days, and you're doing amazing.",
+      "Here's a secret: you're way more special than you ever let yourself believe.",
+      "Keep shining at your own pace—nobody else can ever match your aura, Sneha."
+    ];
+
+    let lastNoteIndex = -1;
+    const scratchCanvas = document.getElementById('scratchCanvas');
+    const sCtx = scratchCanvas.getContext('2d', { willReadFrequently: true });
+    let isScratching = false;
+    let isRevealed = false;
+    let scratchMoveCounter = 0;
+
+    function pickRandomSecretNote() {
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * secretScratchNotes.length);
+      } while (randomIndex === lastNoteIndex && secretScratchNotes.length > 1);
+      
+      lastNoteIndex = randomIndex;
+      const headerEl = document.getElementById('scratchNoteHeader');
+      const bodyEl = document.getElementById('scratchNoteBody');
+      
+      if (headerEl) {
+        headerEl.innerText = `✦ Secret Note #${randomIndex + 1} of ${secretScratchNotes.length} ✦`;
+      }
+      if (bodyEl) {
+        bodyEl.innerText = `"${secretScratchNotes[randomIndex]}"`;
+      }
+    }
+
+    function initScratchFoil() {
+      const parent = scratchCanvas.parentElement;
+      const width = parent.clientWidth || 320;
+      const height = parent.clientHeight || 155;
+
+      scratchCanvas.width = width;
+      scratchCanvas.height = height;
+      scratchCanvas.style.opacity = '1';
+      scratchCanvas.style.pointerEvents = 'auto';
+      isRevealed = false;
+      scratchMoveCounter = 0;
+
+      document.getElementById('scratchPercentTag').innerText = '0% Scratched';
+
+      sCtx.globalCompositeOperation = 'source-over';
+      const grad = sCtx.createLinearGradient(0, 0, width, height);
+      grad.addColorStop(0, '#b8860b');
+      grad.addColorStop(0.3, '#f6d365');
+      grad.addColorStop(0.55, '#fde68a');
+      grad.addColorStop(0.8, '#d4af37');
+      grad.addColorStop(1, '#996515');
+      sCtx.fillStyle = grad;
+      sCtx.fillRect(0, 0, width, height);
+
+      sCtx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      sCtx.lineWidth = 2;
+      for (let i = -height; i < width + height; i += 14) {
+        sCtx.beginPath();
+        sCtx.moveTo(i, 0);
+        sCtx.lineTo(i + height, height);
+        sCtx.stroke();
+      }
+
+      sCtx.fillStyle = '#3b2504';
+      sCtx.font = 'bold 12px "JetBrains Mono", monospace';
+      sCtx.textAlign = 'center';
+      sCtx.fillText('✦ RUB FOIL TO UNLOCK SECRET ✦', width / 2, height / 2 + 4);
+    }
+
+    function checkScratchCompletion() {
+      if (isRevealed) return;
+      const pixels = sCtx.getImageData(0, 0, scratchCanvas.width, scratchCanvas.height).data;
+      let transparentPixels = 0;
+      const totalPixels = pixels.length / 4;
+
+      for (let i = 3; i < pixels.length; i += 16) {
+        if (pixels[i] === 0) transparentPixels++;
+      }
+
+      const percent = Math.min(100, Math.round((transparentPixels / (totalPixels / 4)) * 100));
+      document.getElementById('scratchPercentTag').innerText = `${percent}% Scratched`;
+
+      if (percent >= 55) {
+        isRevealed = true;
+        document.getElementById('scratchPercentTag').innerText = '100% Unlocked ✨';
+        scratchCanvas.style.opacity = '0';
+        scratchCanvas.style.pointerEvents = 'none';
+        if (typeof triggerHeartSupernova === 'function') triggerHeartSupernova();
+        if (typeof playSynthHeartbeat === 'function') playSynthHeartbeat(440, 0.25);
+      }
+    }
+
+    function scratch(e) {
+      if (!isScratching || isRevealed) return;
+      const rect = scratchCanvas.getBoundingClientRect();
+      const clientX = e.clientX !== undefined ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY !== undefined ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      sCtx.globalCompositeOperation = 'destination-out';
+      sCtx.beginPath();
+      sCtx.arc(x, y, 24, 0, Math.PI * 2);
+      sCtx.fill();
+
+      scratchMoveCounter++;
+      if (scratchMoveCounter % 6 === 0) {
+        checkScratchCompletion();
+      }
+    }
+
+    scratchCanvas.addEventListener('mousedown', (e) => { isScratching = true; scratch(e); });
+    window.addEventListener('mouseup', () => { if (isScratching) { isScratching = false; checkScratchCompletion(); } });
+    scratchCanvas.addEventListener('mousemove', scratch);
+
+    scratchCanvas.addEventListener('touchstart', (e) => { isScratching = true; scratch(e); }, { passive: true });
+    window.addEventListener('touchend', () => { if (isScratching) { isScratching = false; checkScratchCompletion(); } });
+    scratchCanvas.addEventListener('touchmove', scratch, { passive: true });
+
+    function resetScratchFoil(loadNextNote = true) {
+      if (loadNextNote) {
+        pickRandomSecretNote();
+      }
+      initScratchFoil();
+      if (typeof playSynthHeartbeat === 'function') playSynthHeartbeat(260, 0.1);
+    }
+
+    /* =========================================================
+       6. BIOMETRIC HOLD & REAL-TIME CLOCK
+       ========================================================= */
+    let holdTimer = null;
+    let holdProgress = 0;
+    const progressCircle = document.getElementById('holdProgressCircle');
+    const touchFeedback = document.getElementById('touchFeedback');
+    const totalCircumference = 264;
+
+    const warmComfortQuotes = [
+      "Your presence brings a quiet calm that makes the loudest days feel completely manageable.",
+      "No matter how fast the world moves around us, Sneha... you will always be a place of quiet peace.",
+      "You are held in the warmest, safest corner of this universe—always protected, always cherished.",
+      "The aux cord will forever be reserved for you. Take a deep, gentle breath.",
+      "You are valued, admired, and never, ever an inconvenience."
+    ];
+
+    function startBiometricHold(e) {
+      if (e && e.cancelable) e.preventDefault();
+      holdProgress = 0;
+      touchFeedback.innerText = "Syncing Neural Resonance...";
+      touchFeedback.style.opacity = "0.7";
+
+      playSynthHeartbeat(110, 0.4);
+
+      clearInterval(holdTimer);
+      holdTimer = setInterval(() => {
+        holdProgress += 6;
+        const offset = totalCircumference - (holdProgress / 100) * totalCircumference;
+        progressCircle.style.strokeDashoffset = offset;
+
+        if (holdProgress % 24 === 0) playSynthHeartbeat(130, 0.2);
+
+        if (holdProgress >= 100) {
+          clearInterval(holdTimer);
+          triggerBiometricCelebration();
+        }
+      }, 50);
+    }
+
+    function endBiometricHold() {
+      clearInterval(holdTimer);
+      holdProgress = 0;
+      progressCircle.style.strokeDashoffset = totalCircumference;
+    }
+
+    function triggerBiometricCelebration() {
+      const q = warmComfortQuotes[Math.floor(Math.random() * warmComfortQuotes.length)];
+      touchFeedback.innerText = `"${q}"`;
+      touchFeedback.style.opacity = "1";
+
+      playSynthHeartbeat(220, 0.6);
+      triggerHeartSupernova();
+
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+    }
+
+    function burnStressThought() {
+      const input = document.getElementById('stressInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.classList.add('disintegrate');
+      playSynthHeartbeat(80, 0.5);
+
+      setTimeout(() => {
+        input.value = "";
+        input.classList.remove('disintegrate');
+        input.placeholder = "✓ Vaporized into the 3D cosmic void. It has zero power over you now.";
+      }, 700);
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const secs = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('liveClock').innerText = `${hrs}:${mins}:${secs} IST`;
+    }
+    setInterval(updateLiveClock, 1000);
+
+    window.addEventListener('DOMContentLoaded', function () {
+      init3D();
+      animate();
+      generateProceduralMessage();
+      pickRandomSecretNote();
+      initScratchFoil();
+      updateLiveClock();
+    });
+  </script>
+</body>
+</html>
